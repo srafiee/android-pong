@@ -2,6 +2,7 @@ package org.oep.pong;
 
 import java.util.Random;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -29,6 +30,7 @@ import android.widget.Toast;
  * @author OEP
  *
  */
+@SuppressLint("HandlerLeak")
 public class PongView extends View implements OnTouchListener, OnKeyListener {
 	/** Debug tag */
 	@SuppressWarnings("unused")
@@ -37,7 +39,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	
 	public static final int
 		STARTING_LIVES = 1,
-		PLAYER_PADDLE_SPEED = 10;
+		PLAYER_PADDLE_SPEED = 100;
 	
 	/**
 	 * This is mostly deprecated but kept around if the need
@@ -71,7 +73,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	/** Mutes sounds when true */
 	private boolean mMuted = false;
 
-	private Paddle mRed, mBlue;
+	private Paddle mRed, mBlue, mGray;
 	
 	/** Touch boxes for various functions. These are assigned in initialize() */
 	private Rect mPauseTouchBox;
@@ -96,7 +98,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	private static final int PADDING = 3;
 	
 	/** Scrollwheel sensitivity */
-	private static final int SCROLL_SENSITIVITY = 80;
+	private static final int SCROLL_SENSITIVITY = 100;
 
 	/** Redraws the screen according to FPS */
 	private RefreshHandler mRedrawHandler = new RefreshHandler();
@@ -258,6 +260,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	protected void handleBounces(float px, float py) {
 		handleTopFastBounce(mRed, px, py);
 		handleBottomFastBounce(mBlue, px, py);
+		handleMiddleFastBounce(mGray, px,py);
 		
 		// Handle bouncing off of a wall
 		if(mBall.x <= Ball.RADIUS || mBall.x >= getWidth() - Ball.RADIUS) {
@@ -289,6 +292,28 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 			mBall.bouncePaddle(paddle);
 			playSound(mPaddleSFX);
 			increaseDifficulty();
+		}
+	}
+	
+	protected void handleMiddleFastBounce(Paddle paddle, float px, float py )
+	{
+	
+		float mx = mBall.x;
+		float my = mBall.y - Ball.RADIUS;
+		float pmx = px;
+		float pmy = py - Ball.RADIUS;
+		float dyp = my - paddle.getBottom();
+		float xc = mx + (mx - pmx) * dyp / (my - pmy);
+		
+		if(my < paddle.getBottom() && pmy > paddle.getBottom()
+				&& xc > paddle.getLeft() && xc < paddle.getRight()) {
+			
+			mBall.x = xc;
+			mBall.y = paddle.getBottom() + Ball.RADIUS;
+			mBall.bouncePaddle(paddle);
+			playSound(mPaddleSFX);
+			increaseDifficulty();
+			
 		}
 	}
 	
@@ -403,10 +428,13 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 		cpu.move(true);
 	}
 	
+	
+	
 	/**
 	 * Knocks up the framerate a bit to keep it difficult.
 	 */
 	private void increaseDifficulty() {
+		
 		mBall.speed++;
 	}
 
@@ -447,15 +475,19 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
     private void initializePaddles() {
     	Rect redTouch = new Rect(0,0,getWidth(),getHeight() / 8);
     	Rect blueTouch = new Rect(0, 7 * getHeight() / 8, getWidth(), getHeight());
+    	Rect grayTouch = new Rect(0, 7 * getHeight() / 8, getWidth(), getHeight());
     	
     	mRed = new Paddle(Color.RED, redTouch.bottom + PADDING);
     	mBlue = new Paddle(Color.BLUE, blueTouch.top - PADDING - Paddle.PADDLE_THICKNESS);
+    	mGray = new Paddle(Color.GRAY, grayTouch.top + PADDING);
     	
     	mRed.setTouchbox( redTouch );
     	mBlue.setTouchbox( blueTouch );
+    	mGray.setTouchbox(grayTouch);
     	
     	mRed.setHandicap(mCpuHandicap);
     	mBlue.setHandicap(mCpuHandicap);
+    	mGray.setHandicap(mCpuHandicap);
     	
     	mRed.player = mRedPlayer;
     	mBlue.player = mBluePlayer;
@@ -525,6 +557,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
         // Draw the paddles / touch boundaries
     	mRed.draw(canvas);
     	mBlue.draw(canvas);
+    	mGray.draw(canvas);
 
     	// Draw touchboxes if needed
     	if(gameRunning() && mRed.player && mCurrentState == State.Running)
@@ -538,6 +571,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
         mPaint.setColor(Color.WHITE);
         
         mBall.draw(canvas);
+        
         
         // If either is a not a player, blink and let them know they can join in!
         // This blinks with the ball.
@@ -969,10 +1003,10 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 		protected float keepX(float x) {
 			return bound(x, Ball.RADIUS, getWidth() - Ball.RADIUS);
 		}
-		
+		//change the ball speed from 4.0f to 12.0f
 		public static final double BOUND = Math.PI / 9;
-		public static final float SPEED = 4.0f; 
-		public static final int RADIUS = 4;
+		public static final float SPEED = 12.0f; 
+		public static final int RADIUS = 8;
 		public static final double SALT = 4 * Math.PI / 9;
 	}
 
