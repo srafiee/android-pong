@@ -37,7 +37,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	
 	public static final int
 		STARTING_LIVES = 1,
-		PLAYER_PADDLE_SPEED = 10;
+		PLAYER_PADDLE_SPEED = 30;
 	
 	/**
 	 * This is mostly deprecated but kept around if the need
@@ -407,7 +407,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	 * Knocks up the framerate a bit to keep it difficult.
 	 */
 	private void increaseDifficulty() {
-		mBall.speed++;
+		mBall.speed=mBall.speed+3;
 	}
 
 	/**
@@ -470,7 +470,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
     private void serveBall() {
     	mBall.x = getWidth() / 2;
     	mBall.y = getHeight() / 2;
-    	mBall.speed = Ball.SPEED + mBallSpeedModifier;
+    	mBall.speed = Ball.SPEED + mBallSpeedModifier+5;
     	mBall.randomAngle();
     	mBall.pause();
     }
