@@ -568,7 +568,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
         
         // Draw ball stuff
         mPaint.setStyle(Style.FILL);
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(Color.GREEN);
         
         mBall.draw(canvas);
         
@@ -595,7 +595,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
         	String pause = context.getString(R.string.pause);
         	int pausew = (int) mPaint.measureText(pause);
         
-        	mPaint.setColor(Color.GREEN);
+        	mPaint.setColor(Color.RED);
         	mPaint.setStyle(Style.STROKE);
         	canvas.drawRect(mPauseTouchBox, mPaint);
         	canvas.drawText(pause, getWidth() / 2 - pausew / 2, getHeight() / 2, mPaint);
@@ -812,7 +812,7 @@ public class PongView extends View implements OnTouchListener, OnKeyListener {
 	
 	private void playSound(int rid) {
 		if(mMuted == true) return;
-		mPool.play(rid, 0.2f, 0.2f, 1, 0, 1.0f);
+		mPool.play(rid, 0.6f, 0.6f, 1, 0, 2.0f);
 	}
 	
 	class Ball {
